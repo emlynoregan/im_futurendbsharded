@@ -8,7 +8,7 @@ except ImportError:
 
 dist = setup(
     name='im_futurendbsharded',
-    version='0.1.0',
+    version='0.1.1',
     description='future based ndb sharded functions, for traversing ndb objects at any scale, for Google App Engine, Python standard environment',
     author='Emlyn O\'Regan',
     author_email='emlynoregan@gmail.com',
