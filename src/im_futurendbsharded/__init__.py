@@ -31,19 +31,23 @@ def futurendbshardedpagemap(pagemapf=None, ndbquery=None, pagesize=100, onsucces
 
                 lonallchildsuccessf = GenerateOnAllChildSuccess(futurekey, 0 if pagemapf else len(keys), lambda a, b: a + b)
                          
+                lweightUsed = 0
                 if pagemapf:
                     futurename = "pagemap %s of %s" % (len(keys), keyrange)
                     lonallchildsuccessf = GenerateOnAllChildSuccess(futurekey, linitialresult, loncombineresultsf)
-                    future(pagemapf, parentkey=futurekey, futurename=futurename, onallchildsuccessf=lonallchildsuccessf, weight = len(keys), **taskkwargs)(keys)
+                    
+                    lweightUsed = weight * 0.05
+                    future(pagemapf, parentkey=futurekey, futurename=futurename, onallchildsuccessf=lonallchildsuccessf, weight = lweightUsed, **taskkwargs)(keys)
                 else:
-                    setlocalprogress(futurekey, len(keys))
+                    pass
+                    #setlocalprogress(futurekey, len(keys))
 
                 if more and keys:
                     lonallchildsuccessf = GenerateOnAllChildSuccess(futurekey, linitialresult if pagemapf else len(keys), loncombineresultsf)
                     newkeyrange = KeyRange(keys[-1], keyrange.key_end, keyrange.direction, False, keyrange.include_end)
                     krlist = newkeyrange.split_range()
                     logdebug("krlist: %s" % krlist)
-                    newweight = (weight / len(krlist)) - len(keys) if weight else None
+                    newweight = (weight - lweightUsed) / len(krlist) if weight else None
                     for kr in krlist:
                         futurename = "shard %s" % (kr)
                         future(MapOverRange, parentkey=futurekey, futurename=futurename, onallchildsuccessf = lonallchildsuccessf, weight = newweight, **taskkwargs)(kr, weight = newweight)
